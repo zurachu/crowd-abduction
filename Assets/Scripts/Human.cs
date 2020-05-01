@@ -9,12 +9,22 @@ public class Human : MonoBehaviour
     [SerializeField] private Rigidbody rigidbody;
     [SerializeField] private Animator animator;
 
+
+    private bool UnderAbstruction => animator.speed <= 0;
+    private bool CompletedAbstruction => transform.position.y >= gamingCameraY;
+
     private Bounds bounds;
+    private float gamingCameraY;
 
     private void FixedUpdate()
     {
-        if (animator.speed <= 0f)
+        if (UnderAbstruction)
         {
+            if (CompletedAbstruction)
+            {
+                Destroy(gameObject);
+            }
+
             return;
         }
 
@@ -31,7 +41,7 @@ public class Human : MonoBehaviour
             velocity.z = -velocity.z;
         }
 
-        rigidbody.velocity = NormalizedVelocity(velocity);
+        rigidbody.velocity = velocity;
 
         var cross = Vector3.Cross(Vector3.forward, rigidbody.velocity);
         var angle = Vector3.Angle(Vector3.forward, rigidbody.velocity);
@@ -45,6 +55,7 @@ public class Human : MonoBehaviour
     public void Initialize(Bounds bounds)
     {
         this.bounds = bounds;
+        gamingCameraY = Camera.main.transform.position.y;
 
         var position = transform.position;
         position.x = Random.Range(bounds.min.x, bounds.max.x);
@@ -64,9 +75,10 @@ public class Human : MonoBehaviour
         skinnedMeshRenderer.materials = materialList.ToArray();
     }
 
-    public void Stop()
+    public void Abducted()
     {
-        rigidbody.velocity = Vector3.zero;
+        transform.localRotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
+        rigidbody.velocity = Vector3.up * 20f;
         animator.speed = 0f;
     }
 

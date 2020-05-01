@@ -31,6 +31,7 @@ public class SampleScene : MonoBehaviour
         }
 
         inputManager.Initialize(abductionCircle, OnAbduct);
+        UpdateHudText();
     }
 
     private void FixedUpdate()
@@ -48,12 +49,28 @@ public class SampleScene : MonoBehaviour
             return;
         }
 
-        humans.ForEach(_human => _human.Stop());
+        var remainingHumans = new List<Human>();
+        humans.ForEach(_human =>
+        {
+            _human.UpdateView(abductionCircle);
+            if (abductionCircle.Contains(_human))
+            {
+                _human.Abducted();
+            }
+            else
+            {
+                remainingHumans.Add(_human);
+            }
+        });
 
-        var containedHumanCount = humans.FindAll(_human => abductionCircle.Contains(_human)).Count;
+        humans = remainingHumans;
+        UpdateHudText();
 
-        hudText.text = $"{containedHumanCount}";
+//        inputManager.gameObject.SetActive(false);
+    }
 
-        inputManager.gameObject.SetActive(false);
+    private void UpdateHudText()
+    {
+        hudText.text = $"{humans.Count}/{initialHumanCount}";
     }
 }
