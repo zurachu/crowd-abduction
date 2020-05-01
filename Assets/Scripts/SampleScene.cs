@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SampleScene : MonoBehaviour
@@ -10,12 +11,19 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private InputManager inputManager;
     [SerializeField] private AbductionCircle abductionCircle;
 
+    private int initialHumanCount;
     private List<Human> humans;
 
     private void Start()
     {
+        if (!PlayFabLoginManagerSingleton.Instance.LoggedIn)
+        {
+            SceneManager.LoadScene("InitialScene");
+        }
+
+        initialHumanCount = TitleConstData.InitialHumanCount;
         humans = new List<Human>();
-        for (int i = 0; i < TitleConstData.InitialHumanCount; i++)
+        for (int i = 0; i < initialHumanCount; i++)
         {
             var human = Instantiate(humanPrefab);
             human.Initialize(ground.bounds);
