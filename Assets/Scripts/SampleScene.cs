@@ -6,10 +6,11 @@ using UnityEngine.UI;
 public class SampleScene : MonoBehaviour
 {
     [SerializeField] private MeshRenderer ground;
+    [SerializeField] private AbductionCircle abductionCircle;
     [SerializeField] private Human humanPrefab;
+    [SerializeField] private TitleView titleView;
     [SerializeField] private Text hudText;
     [SerializeField] private InputManager inputManager;
-    [SerializeField] private AbductionCircle abductionCircle;
 
     private int initialHumanCount;
     private List<Human> humans;
@@ -30,7 +31,7 @@ public class SampleScene : MonoBehaviour
             humans.Add(human);
         }
 
-        inputManager.Initialize(abductionCircle, OnAbduct);
+        inputManager.Initialize(abductionCircle, null);
         UpdateHudText();
     }
 
@@ -40,6 +41,17 @@ public class SampleScene : MonoBehaviour
         {
             humans.ForEach(_human => _human.UpdateView(abductionCircle));
         }
+    }
+
+    public void OnClickStartGame()
+    {
+        titleView.gameObject.SetActive(false);
+        inputManager.Initialize(abductionCircle, OnAbduct);
+    }
+
+    public void OnClickLeaderboard()
+    {
+        SceneManager.LoadScene("LeaderboardScene");
     }
 
     private void OnAbduct(AbductionCircle abductionCircle)
@@ -71,6 +83,6 @@ public class SampleScene : MonoBehaviour
 
     private void UpdateHudText()
     {
-        hudText.text = $"{humans.Count}/{initialHumanCount}";
+        hudText.text = $"ホカク {initialHumanCount - humans.Count}/{initialHumanCount}人";
     }
 }

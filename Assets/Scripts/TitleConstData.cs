@@ -5,4 +5,5 @@
     public static float HumanVelocity => Source.GetFloat("HumanVelocity");
     public static int InitialHumanCount => Source.GetInt("InitialHumanCount");
     public static float Radius => Source.GetFloat("Radius");
+    public static string TitleDescription => Source.GetString("TitleDescription");
 }
