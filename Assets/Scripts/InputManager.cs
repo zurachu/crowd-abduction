@@ -27,7 +27,7 @@ public class InputManager : MonoBehaviour
             worldPoint.y = abductionCircle.transform.position.y;
             abductionCircle.transform.position = worldPoint;
 
-            if (Input.GetMouseButtonUp(0))
+            if (Input.GetMouseButtonDown(0))
             {
                 onAbduct?.Invoke(abductionCircle);
             }
