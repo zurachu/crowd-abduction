@@ -66,12 +66,9 @@ public class Human : MonoBehaviour
 
     public void UpdateView(AbductionCircle abductionCircle)
     {
-        var materialList = defaultMaterials;
-        if (abductionCircle.isActiveAndEnabled && abductionCircle.Contains(this))
-        {
-            materialList = containedMaterials;
-        }
-
+        var inCircle = abductionCircle.isActiveAndEnabled && abductionCircle.Contains(this);
+        rigidbody.velocity = NormalizedVelocity(rigidbody.velocity, inCircle);
+        var materialList = inCircle ? containedMaterials : defaultMaterials;
         skinnedMeshRenderer.materials = materialList.ToArray();
     }
 
@@ -82,8 +79,8 @@ public class Human : MonoBehaviour
         animator.speed = 0f;
     }
 
-    private Vector3 NormalizedVelocity(Vector3 velocity)
+    private Vector3 NormalizedVelocity(Vector3 velocity, bool inCircle = false)
     {
-        return velocity.normalized * TitleConstData.HumanVelocity;
+        return velocity.normalized * (inCircle ? TitleConstData.HumanVelocityInCircle : TitleConstData.HumanVelocity);
     }
 }
