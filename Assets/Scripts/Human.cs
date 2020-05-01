@@ -72,6 +72,6 @@ public class Human : MonoBehaviour
 
     private Vector3 NormalizedVelocity(Vector3 velocity)
     {
-        return velocity.normalized * 1f;
+        return velocity.normalized * TitleConstData.HumanVelocity;
     }
 }

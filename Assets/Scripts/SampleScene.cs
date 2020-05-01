@@ -15,8 +15,7 @@ public class SampleScene : MonoBehaviour
     private void Start()
     {
         humans = new List<Human>();
-        
-        for (int i = 0; i < 300; i++)
+        for (int i = 0; i < TitleConstData.InitialHumanCount; i++)
         {
             var human = Instantiate(humanPrefab);
             human.Initialize(ground.bounds);
@@ -33,7 +32,6 @@ public class SampleScene : MonoBehaviour
             humans.ForEach(_human => _human.UpdateView(abductionCircle));
         }
     }
-
 
     private void OnAbduct(AbductionCircle abductionCircle)
     {
