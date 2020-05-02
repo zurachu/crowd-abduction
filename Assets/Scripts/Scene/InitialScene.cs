@@ -10,12 +10,12 @@ public class InitialScene : MonoBehaviour
 #if !UNITY_EDITOR
         Debug.unityLogger.logEnabled = false;
 #endif
-        await TryLoginWithRetry();
-        await TryGetTitleConstDataWithRetry();
+        await LoginWithRetry();
+        await GetTitleConstDataWithRetry();
         SceneManager.LoadScene("SampleScene");
     }
 
-    private UniTask TryLoginWithRetry()
+    private UniTask LoginWithRetry()
     {
         var source = new UniTaskCompletionSource();
         Action onSuccess = () => source.TrySetResult();
@@ -23,13 +23,13 @@ public class InitialScene : MonoBehaviour
         PlayFabLoginManagerSingleton.Instance.TryLogin(onSuccess, async (_) =>
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
-            await TryLoginWithRetry();
+            await LoginWithRetry();
         });
 
         return source.Task;
     }
 
-    private UniTask TryGetTitleConstDataWithRetry()
+    private UniTask GetTitleConstDataWithRetry()
     {
         var source = new UniTaskCompletionSource();
         Action onSuccess = () => source.TrySetResult();
@@ -37,7 +37,7 @@ public class InitialScene : MonoBehaviour
         PlayFabTitleConstDataManagerSingleton.Instance.TryGetData(onSuccess, async (_) =>
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
-            await TryGetTitleConstDataWithRetry();
+            await GetTitleConstDataWithRetry();
         });
 
         return source.Task;

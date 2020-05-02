@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using UniRx.Async;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,7 +10,9 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private MeshRenderer ground;
     [SerializeField] private AbductionCircle abductionCircle;
     [SerializeField] private Human humanPrefab;
+    [SerializeField] private Canvas hudRoot;
     [SerializeField] private TitleView titleView;
+    [SerializeField] private LeaderboardView leaderboardViewPrefab;
     [SerializeField] private Text hudText;
     [SerializeField] private InputManager inputManager;
 
@@ -51,7 +55,8 @@ public class SampleScene : MonoBehaviour
 
     public void OnClickLeaderboard()
     {
-        SceneManager.LoadScene("LeaderboardScene");
+        titleView.gameObject.SetActive(false);
+        Instantiate(leaderboardViewPrefab, hudRoot.transform);
     }
 
     private void OnAbduct(AbductionCircle abductionCircle)
@@ -78,11 +83,21 @@ public class SampleScene : MonoBehaviour
         humans = remainingHumans;
         UpdateHudText();
 
-//        inputManager.gameObject.SetActive(false);
+        UpdatePlayerStatisticWithRetry(initialHumanCount - humans.Count);
+        //        inputManager.gameObject.SetActive(false);
     }
 
     private void UpdateHudText()
     {
         hudText.text = $"ホカク {initialHumanCount - humans.Count}/{initialHumanCount}人";
+    }
+
+    private void UpdatePlayerStatisticWithRetry(int score)
+    {
+        PlayFabLeaderboardUtil.UpdatePlayerStatistic(TitleConstData.LeaderboardStatisticName, score, null, async (_) =>
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(1));
+            UpdatePlayerStatisticWithRetry(score);
+        });
     }
 }
