@@ -74,6 +74,8 @@ public class SampleScene : MonoBehaviour
             return;
         }
 
+        abductionCircle.StartEffect();
+
         var remainingHumans = new List<Human>();
         humans.ForEach(_human =>
         {
@@ -102,7 +104,7 @@ public class SampleScene : MonoBehaviour
 
         if (remainingCount > 0)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(0.5));
+            await UniTask.Delay(TimeSpan.FromSeconds(1));
             inputManager.gameObject.SetActive(true);
         }
         else
@@ -110,9 +112,9 @@ public class SampleScene : MonoBehaviour
             var score = initialHumanCount - humans.Count;
             UpdatePlayerStatisticWithRetry(score);
 
-            await UniTask.Delay(TimeSpan.FromSeconds(0.3));
+            await UniTask.Delay(TimeSpan.FromSeconds(0.4));
             var screenShotTexture = await CaptureScreenShot();
-            await UniTask.Delay(TimeSpan.FromSeconds(0.7));
+            await UniTask.Delay(TimeSpan.FromSeconds(1.1));
 
             inputManager.gameObject.SetActive(true);
             inputManager.Initialize(abductionCircle, null);

@@ -3,11 +3,15 @@
 public class AbductionCircle : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer circle;
+    [SerializeField] private ParticleSystem particleSystem;
 
     private void Start()
     {
-        var diameter = TitleConstData.Radius * 2;
-        circle.transform.localScale = new Vector3(diameter, diameter, 1);
+        var radius = TitleConstData.Radius;
+        circle.transform.localScale = new Vector3(radius * 2, radius * 2, 1);
+        particleSystem.Stop();
+        var particleShape = particleSystem.shape;
+        particleShape.radius = radius;
     }
 
     public bool Contains(Human human)
@@ -16,5 +20,10 @@ public class AbductionCircle : MonoBehaviour
         var humanPosition = human.transform.position;
         humanPosition.y = position.y;
         return Vector3.Distance(position, humanPosition) <= transform.localScale.x / 2;
+    }
+
+    public void StartEffect()
+    {
+        particleSystem.Play();
     }
 }

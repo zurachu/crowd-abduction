@@ -75,7 +75,7 @@ public class Human : MonoBehaviour
     public void Abducted()
     {
         transform.localRotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
-        rigidbody.velocity = Vector3.up * 20f;
+        rigidbody.velocity = Vector3.up * TitleConstData.HumanVelocityOnAbducted;
         animator.speed = 0f;
     }
 
