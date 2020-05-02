@@ -5,35 +5,41 @@ using UnityEngine.SceneManagement;
 
 public class InitialScene : MonoBehaviour
 {
-    private void Start()
+    private async void Start()
     {
 #if !UNITY_EDITOR
         Debug.unityLogger.logEnabled = false;
 #endif
-        TryLoginWithRetry(() =>
-        {
-            TryGetTitleConstDataWithRetry(() =>
-            {
-                SceneManager.LoadScene("SampleScene");
-            });
-        });
+        await TryLoginWithRetry();
+        await TryGetTitleConstDataWithRetry();
+        SceneManager.LoadScene("SampleScene");
     }
 
-    private void TryLoginWithRetry(Action onSuccess)
+    private UniTask TryLoginWithRetry()
     {
+        var source = new UniTaskCompletionSource();
+        Action onSuccess = () => source.TrySetResult();
+
         PlayFabLoginManagerSingleton.Instance.TryLogin(onSuccess, async (_) =>
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
-            TryLoginWithRetry(onSuccess);
+            await TryLoginWithRetry();
         });
+
+        return source.Task;
     }
 
-    private void TryGetTitleConstDataWithRetry(Action onSuccess)
+    private UniTask TryGetTitleConstDataWithRetry()
     {
+        var source = new UniTaskCompletionSource();
+        Action onSuccess = () => source.TrySetResult();
+
         PlayFabTitleConstDataManagerSingleton.Instance.TryGetData(onSuccess, async (_) =>
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
-            TryGetTitleConstDataWithRetry(onSuccess);
+            await TryGetTitleConstDataWithRetry();
         });
+
+        return source.Task;
     }
 }
