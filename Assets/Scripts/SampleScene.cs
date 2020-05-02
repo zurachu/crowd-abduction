@@ -17,6 +17,7 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private Text scoreText;
     [SerializeField] private Text remainingCountText;
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private AudioSource audioSource;
 
     private int initialHumanCount;
     private List<Human> humans;
@@ -41,6 +42,8 @@ public class SampleScene : MonoBehaviour
         remainingCount = TitleConstData.AbductionCount;
         inputManager.Initialize(abductionCircle, null);
         UpdateHudText();
+        audioSource.clip = AudioClipManagerSingleton.Instance.Bgm;
+        audioSource.Play();
     }
 
     private void FixedUpdate()
@@ -51,9 +54,10 @@ public class SampleScene : MonoBehaviour
         }
     }
 
-    public void OnClickStartGame()
+    public async void OnClickStartGame()
     {
         titleView.gameObject.SetActive(false);
+        await UniTask.DelayFrame(1); // ボタンタップが初回入力に誤爆しないよう
         inputManager.Initialize(abductionCircle, OnAbduct);
     }
 
@@ -87,6 +91,7 @@ public class SampleScene : MonoBehaviour
         humans = remainingHumans;
         remainingCount--;
         UpdateHudText();
+        audioSource.PlayOneShot(AudioClipManagerSingleton.Instance.Abduct);
 
         _ = ChallengeNextOrEndGame();
     }
@@ -107,12 +112,14 @@ public class SampleScene : MonoBehaviour
 
             await UniTask.Delay(TimeSpan.FromSeconds(0.3));
             var screenShotTexture = await CaptureScreenShot();
-            await UniTask.Delay(TimeSpan.FromSeconds(0.2));
+            await UniTask.Delay(TimeSpan.FromSeconds(0.7));
 
             inputManager.gameObject.SetActive(true);
             inputManager.Initialize(abductionCircle, null);
             var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
             leaderboardView.InitializeTweetButton(score, screenShotTexture);
+            audioSource.Stop();
+            audioSource.PlayOneShot(AudioClipManagerSingleton.Instance.Result);
         }
     }
 

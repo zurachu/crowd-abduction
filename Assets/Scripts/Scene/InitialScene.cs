@@ -10,6 +10,7 @@ public class InitialScene : MonoBehaviour
 #if !UNITY_EDITOR
         Debug.unityLogger.logEnabled = false;
 #endif
+        AudioClipManagerSingleton.Instance.Preload();
         await LoginWithRetry();
         await GetTitleConstDataWithRetry();
         SceneManager.LoadScene("SampleScene");
@@ -24,6 +25,7 @@ public class InitialScene : MonoBehaviour
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
             await LoginWithRetry();
+            source.TrySetResult();
         });
 
         return source.Task;
@@ -38,6 +40,7 @@ public class InitialScene : MonoBehaviour
         {
             await UniTask.Delay(TimeSpan.FromSeconds(1));
             await GetTitleConstDataWithRetry();
+            source.TrySetResult();
         });
 
         return source.Task;
