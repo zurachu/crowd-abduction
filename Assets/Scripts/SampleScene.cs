@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UniRx.Async;
 using UnityEngine;
@@ -84,7 +85,36 @@ public class SampleScene : MonoBehaviour
         UpdateHudText();
 
         UpdatePlayerStatisticWithRetry(initialHumanCount - humans.Count);
-        //        inputManager.gameObject.SetActive(false);
+        _ = EndGame();
+    }
+
+    private async UniTask EndGame()
+    {
+        inputManager.gameObject.SetActive(false);
+        await UniTask.Delay(TimeSpan.FromSeconds(0.5));
+
+        var screenShotTexture = await CaptureScreenShot();
+        await UniTask.Delay(TimeSpan.FromSeconds(1));
+
+        inputManager.gameObject.SetActive(true);
+        inputManager.Initialize(abductionCircle, null);
+        var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
+        leaderboardView.InitializeTweetButton(initialHumanCount - humans.Count, screenShotTexture);
+    }
+
+    private UniTask<Texture2D> CaptureScreenShot()
+    {
+        var source = new UniTaskCompletionSource<Texture2D>();
+        StartCoroutine(CaptureScreenShot(_texture => source.TrySetResult(_texture)));
+        return source.Task;
+    }
+
+    private IEnumerator CaptureScreenShot(Action<Texture2D> onCaptured)
+    {
+        // await UniTask.Yield(PlayerLoopTiming.PostLateUpdate) だとうまくいかなかったのでわざわざ Coroutine を噛ませる
+        yield return new WaitForEndOfFrame();
+        var texture = ScreenCapture.CaptureScreenshotAsTexture();
+        onCaptured?.Invoke(texture);
     }
 
     private void UpdateHudText()

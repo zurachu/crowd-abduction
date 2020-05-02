@@ -9,4 +9,5 @@
     public static int LeaderboardEntryCount => Source.GetInt("LeaderboardEntryCount");
     public static float Radius => Source.GetFloat("Radius");
     public static string TitleDescription => Source.GetString("TitleDescription");
+    public static string TweetMessageFormat => Source.GetString("TweetMessageFormat");
 }

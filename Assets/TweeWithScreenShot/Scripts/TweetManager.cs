@@ -42,10 +42,10 @@ namespace TweetWithScreenShot
             }
         }
 
-        public static IEnumerator TweetWithScreenShot(string text)
+        public static IEnumerator TweetWithScreenShot(string text, Texture2D tex = null)
         {
             yield return new WaitForEndOfFrame();
-            var tex = ScreenCapture.CaptureScreenshotAsTexture();
+            tex = tex ?? ScreenCapture.CaptureScreenshotAsTexture();
 
             // imgurへアップロード
             string UploadedURL = "";

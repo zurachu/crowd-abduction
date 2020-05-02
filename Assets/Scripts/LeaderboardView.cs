@@ -12,15 +12,20 @@ public class LeaderboardView : MonoBehaviour
     [SerializeField] private PlayFabLeaderboardEntryItem leaderboardEntryItemPrefab;
     [SerializeField] private Button tweetButton;
 
+    private string tweetMessage;
+    private Texture2D screenShotTexture;
+
     private async void Start()
     {
         var playerLeaderboardEntries = await GetLeaderboardWithRetry();
         SetupScrollView(playerLeaderboardEntries);
     }
 
-    public void Initialize(/* with tweet */)
+    public void InitializeTweetButton(int score, Texture2D screenShotTexture)
     {
-        
+        tweetMessage = string.Format(TitleConstData.TweetMessageFormat, score);
+        this.screenShotTexture = screenShotTexture;
+        tweetButton.gameObject.SetActive(true);
     }
 
     private UniTask<List<PlayerLeaderboardEntry>> GetLeaderboardWithRetry()
@@ -50,8 +55,16 @@ public class LeaderboardView : MonoBehaviour
         }
     }
 
-    public void OnClickTweet()
+    public async void OnClickTweet()
     {
+        if (!tweetButton.isActiveAndEnabled)
+        {
+            return;
+        }
+
+        tweetButton.interactable = false;
+        await TweetWithScreenShot.TweetManager.TweetWithScreenShot(tweetMessage, screenShotTexture);
+        tweetButton.interactable = true;
     }
 
     public void OnClickBack()
