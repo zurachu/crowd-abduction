@@ -14,11 +14,13 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private Canvas hudRoot;
     [SerializeField] private TitleView titleView;
     [SerializeField] private LeaderboardView leaderboardViewPrefab;
-    [SerializeField] private Text hudText;
+    [SerializeField] private Text scoreText;
+    [SerializeField] private Text remainingCountText;
     [SerializeField] private InputManager inputManager;
 
     private int initialHumanCount;
     private List<Human> humans;
+    private int remainingCount;
 
     private void Start()
     {
@@ -36,6 +38,7 @@ public class SampleScene : MonoBehaviour
             humans.Add(human);
         }
 
+        remainingCount = TitleConstData.AbductionCount;
         inputManager.Initialize(abductionCircle, null);
         UpdateHudText();
     }
@@ -82,24 +85,35 @@ public class SampleScene : MonoBehaviour
         });
 
         humans = remainingHumans;
+        remainingCount--;
         UpdateHudText();
 
-        UpdatePlayerStatisticWithRetry(initialHumanCount - humans.Count);
-        _ = EndGame();
+        _ = ChallengeNextOrEndGame();
     }
 
-    private async UniTask EndGame()
+    private async UniTask ChallengeNextOrEndGame()
     {
         inputManager.gameObject.SetActive(false);
-        await UniTask.Delay(TimeSpan.FromSeconds(0.5));
 
-        var screenShotTexture = await CaptureScreenShot();
-        await UniTask.Delay(TimeSpan.FromSeconds(1));
+        if (remainingCount > 0)
+        {
+            await UniTask.Delay(TimeSpan.FromSeconds(0.5));
+            inputManager.gameObject.SetActive(true);
+        }
+        else
+        {
+            var score = initialHumanCount - humans.Count;
+            UpdatePlayerStatisticWithRetry(score);
 
-        inputManager.gameObject.SetActive(true);
-        inputManager.Initialize(abductionCircle, null);
-        var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
-        leaderboardView.InitializeTweetButton(initialHumanCount - humans.Count, screenShotTexture);
+            await UniTask.Delay(TimeSpan.FromSeconds(0.3));
+            var screenShotTexture = await CaptureScreenShot();
+            await UniTask.Delay(TimeSpan.FromSeconds(0.2));
+
+            inputManager.gameObject.SetActive(true);
+            inputManager.Initialize(abductionCircle, null);
+            var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
+            leaderboardView.InitializeTweetButton(score, screenShotTexture);
+        }
     }
 
     private UniTask<Texture2D> CaptureScreenShot()
@@ -119,7 +133,8 @@ public class SampleScene : MonoBehaviour
 
     private void UpdateHudText()
     {
-        hudText.text = $"ホカク {initialHumanCount - humans.Count}/{initialHumanCount}人";
+        scoreText.text = $"ホカク {initialHumanCount - humans.Count}/{initialHumanCount}人";
+        remainingCountText.text = $"ノコリ{remainingCount}カイ";
     }
 
     private void UpdatePlayerStatisticWithRetry(int score)
