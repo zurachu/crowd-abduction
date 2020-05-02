@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 3449993080439524254}
   - component: {fileID: 3449993080439524255}
   - component: {fileID: 3449993080439524240}
+  - component: {fileID: 4043901400063974101}
   m_Layer: 5
   m_Name: LeaderboardView
   m_TagString: Untagged
@@ -92,6 +93,22 @@ MonoBehaviour:
   leaderboardEntryItemPrefab: {fileID: 5387287518894822386, guid: 1e7dda2db83f54d34a6995a1c16a7da9,
     type: 3}
   tweetButton: {fileID: 3449993080559022740}
+--- !u!114 &4043901400063974101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3449993080439524242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19f75461f15a54ca68f6a1c7a03ff532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hashTags:
+  - unityroom
+  - unity1week
+  clientID: 
 --- !u!1 &3449993080559022742
 GameObject:
   m_ObjectHideFlags: 0
