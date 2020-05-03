@@ -89,6 +89,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 671e64da7290f431aaa09ce79a999373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  titleText: {fileID: 3449993080806945435}
   scrollRect: {fileID: 3449993081297974954}
   leaderboardEntryItemPrefab: {fileID: 5387287518894822386, guid: 1e7dda2db83f54d34a6995a1c16a7da9,
     type: 3}
@@ -524,7 +525,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u30CF\u30A4\u30B9\u30B3\u30A2"
+  m_Text: "\u30E9\u30F3\u30AD\u30F3\u30B0"
 --- !u!1 &3449993081297974956
 GameObject:
   m_ObjectHideFlags: 0

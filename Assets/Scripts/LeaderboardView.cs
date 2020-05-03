@@ -8,6 +8,7 @@ using UniRx.Async;
 
 public class LeaderboardView : MonoBehaviour
 {
+    [SerializeField] private Text titleText;
     [SerializeField] private ScrollRect scrollRect;
     [SerializeField] private PlayFabLeaderboardEntryItem leaderboardEntryItemPrefab;
     [SerializeField] private Button tweetButton;
@@ -23,6 +24,7 @@ public class LeaderboardView : MonoBehaviour
 
     public void InitializeTweetButton(int score, Texture2D screenShotTexture)
     {
+        titleText.text = $"今回のホカク：{score}人";
         tweetMessage = string.Format(TitleConstData.TweetMessageFormat, score);
         this.screenShotTexture = screenShotTexture;
         tweetButton.gameObject.SetActive(true);

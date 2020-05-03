@@ -13,9 +13,8 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private Human humanPrefab;
     [SerializeField] private Canvas hudRoot;
     [SerializeField] private TitleView titleView;
+    [SerializeField] private InGameView inGameView;
     [SerializeField] private LeaderboardView leaderboardViewPrefab;
-    [SerializeField] private Text scoreText;
-    [SerializeField] private Text remainingCountText;
     [SerializeField] private InputManager inputManager;
     [SerializeField] private AudioSource audioSource;
 
@@ -41,7 +40,8 @@ public class SampleScene : MonoBehaviour
 
         remainingCount = TitleConstData.AbductionCount;
         inputManager.Initialize(abductionCircle, null);
-        UpdateHudText();
+        titleView.gameObject.SetActive(true);
+        inGameView.gameObject.SetActive(false);
         audioSource.clip = AudioClipManagerSingleton.Instance.Bgm;
         audioSource.Play();
     }
@@ -57,6 +57,8 @@ public class SampleScene : MonoBehaviour
     public async void OnClickStartGame()
     {
         titleView.gameObject.SetActive(false);
+        inGameView.gameObject.SetActive(true);
+        UpdateHudText();
         await UniTask.DelayFrame(1); // ボタンタップが初回入力に誤爆しないよう
         inputManager.Initialize(abductionCircle, OnAbduct);
     }
@@ -118,6 +120,7 @@ public class SampleScene : MonoBehaviour
 
             inputManager.gameObject.SetActive(true);
             inputManager.Initialize(abductionCircle, null);
+            inGameView.gameObject.SetActive(false);
             var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
             leaderboardView.InitializeTweetButton(score, screenShotTexture);
             audioSource.Stop();
@@ -142,8 +145,7 @@ public class SampleScene : MonoBehaviour
 
     private void UpdateHudText()
     {
-        scoreText.text = $"ホカク {initialHumanCount - humans.Count}/{initialHumanCount}人";
-        remainingCountText.text = $"ノコリ{remainingCount}カイ";
+        inGameView.UpdateView(initialHumanCount - humans.Count, remainingCount);
     }
 
     private void UpdatePlayerStatisticWithRetry(int score)

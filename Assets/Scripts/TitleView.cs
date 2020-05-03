@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class TitleView : MonoBehaviour
 {
-    [SerializeField] Text descriptionText;
-    [SerializeField] Text versionText;
+    [SerializeField] private Text descriptionText;
+    [SerializeField] private Text versionText;
 
     private void Start()
     {
