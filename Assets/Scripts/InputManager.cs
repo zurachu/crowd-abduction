@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class InputManager : MonoBehaviour
 {
-    [SerializeField] private RectTransform mouseMoveRange;
-
     private AbductionCircle abductionCircle;
     Action<AbductionCircle> onAbduct;
 
@@ -17,8 +15,8 @@ public class InputManager : MonoBehaviour
     private void Update()
     {
         var mousePosition = Input.mousePosition;
-        if (0 <= mousePosition.x && mousePosition.x < mouseMoveRange.rect.width &&
-            0 <= mousePosition.y && mousePosition.y < mouseMoveRange.rect.height)
+        if (0 <= mousePosition.x && mousePosition.x < Screen.width &&
+            0 <= mousePosition.y && mousePosition.y < Screen.height)
         {
             abductionCircle.gameObject.SetActive(true);
             var mainCamera = Camera.main;
