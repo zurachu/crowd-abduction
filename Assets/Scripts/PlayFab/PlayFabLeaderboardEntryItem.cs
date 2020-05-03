@@ -7,6 +7,7 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
     [SerializeField] private Image baseImage;
     [SerializeField] private Text rankText;
     [SerializeField] private Text nameText;
+    [SerializeField] private Button inputNameButton;
     [SerializeField] private InputField nameInputField;
     [SerializeField] private Button updateNameButton;
     [SerializeField] private Text scoreText;
@@ -21,13 +22,14 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
     {
         rankText.text = (entry.Position + 1).ToString();
         nameText.text = nameInputField.text = entry.DisplayName;
-        scoreText.text = entry.StatValue.ToString();
+        scoreText.text = string.Format(scoreFormat, entry.StatValue);
         if (entry.StatValue < 0)
         {
             scoreText.color = minusScoreColor;
         }
 
         nameText.gameObject.SetActive(false);
+        inputNameButton.gameObject.SetActive(false);
         nameInputField.gameObject.SetActive(false);
         nameInputField.text = entry.DisplayName;
         updateNameButton.gameObject.SetActive(false);
@@ -35,13 +37,30 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
         if (isMyself)
         {
             baseImage.color = mySelfBaseColor;
-            nameInputField.gameObject.SetActive(true);
-            updateNameButton.gameObject.SetActive(true);
+            if (string.IsNullOrEmpty(nameText.text))
+            {
+                nameInputField.gameObject.SetActive(true);
+                updateNameButton.gameObject.SetActive(true);
+            }
+            else
+            {
+                nameText.gameObject.SetActive(true);
+                inputNameButton.gameObject.SetActive(true);
+            }
         }
         else
         {
             nameText.gameObject.SetActive(true);
         }
+    }
+
+    public void OnClickInputName()
+    {
+        nameText.gameObject.SetActive(false);
+        inputNameButton.gameObject.SetActive(false);
+        nameInputField.gameObject.SetActive(true);
+        updateNameButton.gameObject.SetActive(true);
+        updateNameButton.interactable = false;
     }
 
     public void OnInputFieldValueChanged(string text)
@@ -59,9 +78,11 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
             return;
         }
 
-        nameInputField.gameObject.SetActive(false);
         nameText.text = newName;
         nameText.gameObject.SetActive(true);
+        inputNameButton.gameObject.SetActive(true);
+        nameInputField.gameObject.SetActive(false);
+        updateNameButton.gameObject.SetActive(false);
         PlayFabLeaderboardUtil.UpdateUserTitleDisplayName(newName, null, (_) => OnClickUpdateName());
     }
 
