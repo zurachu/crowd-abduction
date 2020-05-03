@@ -49,11 +49,26 @@ public class LeaderboardView : MonoBehaviour
 
     private void SetupScrollView(List<PlayerLeaderboardEntry> playerLeaderboardEntries)
     {
+        var content = scrollRect.content;
+        RectTransform myself = null;
         foreach (var entry in playerLeaderboardEntries)
         {
             var isMyself = entry.PlayFabId == PlayFabLoginManagerSingleton.Instance.PlayFabId;
-            var entryItem = Instantiate(leaderboardEntryItemPrefab, scrollRect.content.transform);
+            var entryItem = Instantiate(leaderboardEntryItemPrefab, content.transform);
             entryItem.Initialize(entry, isMyself);
+            if (isMyself)
+            {
+                myself = entryItem.GetComponent<RectTransform>();
+            }
+        }
+
+        if (myself != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(content);
+            var scrollRectHeight = scrollRect.GetComponent<RectTransform>().rect.height;
+            var y = -myself.localPosition.y - scrollRectHeight / 2;
+            y = Mathf.Max(Mathf.Min(y, content.rect.height - scrollRectHeight), 0);
+            scrollRect.content.localPosition = new Vector3(0, y, 0);
         }
     }
 
