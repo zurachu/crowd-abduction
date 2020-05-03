@@ -114,7 +114,7 @@ public class SampleScene : MonoBehaviour
 
             await UniTask.Delay(TimeSpan.FromSeconds(0.4));
             var screenShotTexture = await CaptureScreenShot();
-            await UniTask.Delay(TimeSpan.FromSeconds(1.1));
+            await UniTask.Delay(TimeSpan.FromSeconds(1.6));
 
             inputManager.gameObject.SetActive(true);
             inputManager.Initialize(abductionCircle, null);
