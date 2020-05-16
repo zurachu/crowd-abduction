@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using PlayFab.ClientModels;
+using UniRx.Async;
+using System;
 
 public class PlayFabLeaderboardEntryItem : MonoBehaviour
 {
@@ -83,7 +85,7 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
         inputNameButton.gameObject.SetActive(true);
         nameInputField.gameObject.SetActive(false);
         updateNameButton.gameObject.SetActive(false);
-        PlayFabLeaderboardUtil.UpdateUserTitleDisplayName(newName, null, (_) => OnClickUpdateName());
+        UpdateUserTitleDisplayNameWithRetry(newName);
     }
 
     private bool IsValidName(string name)
@@ -91,5 +93,21 @@ public class PlayFabLeaderboardEntryItem : MonoBehaviour
         return !string.IsNullOrEmpty(name) &&
             nameMinimumLength <= name.Length && name.Length <= nameInputField.characterLimit &&
             !name.Contains("\r") && !name.Contains("\n");
+    }
+
+    private async void UpdateUserTitleDisplayNameWithRetry(string newName)
+    {
+        while (true)
+        {
+            try
+            {
+                await PlayFabLeaderboardUtil.UpdateUserTitleDisplayNameAsync(newName);
+                break;
+            }
+            catch (Exception)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
     }
 }

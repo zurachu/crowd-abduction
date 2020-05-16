@@ -148,12 +148,19 @@ public class SampleScene : MonoBehaviour
         inGameView.UpdateView(initialHumanCount - humans.Count, remainingCount);
     }
 
-    private void UpdatePlayerStatisticWithRetry(int score)
+    private async void UpdatePlayerStatisticWithRetry(int score)
     {
-        PlayFabLeaderboardUtil.UpdatePlayerStatistic(TitleConstData.LeaderboardStatisticName, score, null, async (_) =>
+        while (true)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(1));
-            UpdatePlayerStatisticWithRetry(score);
-        });
+            try
+            {
+                await PlayFabLeaderboardUtil.UpdatePlayerStatisticAsync(TitleConstData.LeaderboardStatisticName, score);
+                break;
+            }
+            catch (Exception)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
     }
 }

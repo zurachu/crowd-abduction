@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Text;
 using PlayFab;
 using PlayFab.ClientModels;
+using UniRx.Async;
 using UnityEngine;
 
 public class PlayFabTitleConstDataManagerSingleton
@@ -20,23 +21,18 @@ public class PlayFabTitleConstDataManagerSingleton
 
     private GetTitleDataResult result;
 
-    public void TryGetData(Action onSuccess, Action<string> onFailure)
+    public UniTask<GetTitleDataResult> TryGetDataAsync()
     {
-        Action<GetTitleDataResult> resultCallback = _result =>
+        var source = new UniTaskCompletionSource<GetTitleDataResult>();
+        Action<GetTitleDataResult> resultCallback = (_result) =>
         {
             result = _result;
             Debug.Log(Dump());
-            onSuccess?.Invoke();
+            source.TrySetResult(_result);
         };
-
-        Action<PlayFabError> errorCallback = _error =>
-        {
-            var report = _error.GenerateErrorReport();
-            Debug.LogError(report);
-            onFailure?.Invoke(report);
-        };
-
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
         PlayFabClientAPI.GetTitleData(new GetTitleDataRequest(), resultCallback, errorCallback);
+        return source.Task;
     }
 
     public int GetInt(string key)

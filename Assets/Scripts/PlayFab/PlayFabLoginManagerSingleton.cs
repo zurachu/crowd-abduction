@@ -1,6 +1,7 @@
 ﻿using System;
 using PlayFab;
 using PlayFab.ClientModels;
+using UniRx.Async;
 using UnityEngine;
 
 public class PlayFabLoginManagerSingleton
@@ -23,53 +24,46 @@ public class PlayFabLoginManagerSingleton
 
     private LoginResult result;
 
-    public void TryLogin(Action onSuccess, Action<string> onFailure)
+    public async UniTask<LoginResult> TryLoginAsync()
     {
         // Inspector で設定
         if (string.IsNullOrEmpty(PlayFabSettings.TitleId))
         {
-            onFailure?.Invoke("PlayFabSettings.TitleId is not set");
-            return;
+            throw new Exception("PlayFabSettings.TitleId is not set");
         }
 
-        Action<LoginResult> resultCallback = _result =>
-        {
-            Debug.Log(_result.PlayFabId);
-            result = _result;
-            onSuccess?.Invoke();
-        };
-
-        Action<PlayFabError> errorCallback = _error =>
-        {
-            var report = _error.GenerateErrorReport();
-            Debug.LogError(report);
-            onFailure?.Invoke(report);
-        };
-
 #if !UNITY_EDITOR && UNITY_ANDROID
-        TryLoginAndroid(resultCallback, errorCallback);
+        result = await TryLoginAndroidAsync();
 #else
-        TryLoginDefault(resultCallback, errorCallback);
+        result = await TryLoginDefaultAsync();
 #endif
+        return result;
     }
 
-    private void TryLoginAndroid(Action<LoginResult> resultCallback, Action<PlayFabError> errorCallback)
+    private UniTask<LoginResult> TryLoginAndroidAsync()
     {
         var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
         var currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
         var contentResolver = currentActivity.Call<AndroidJavaObject>("getContentResolver");
         var secure = new AndroidJavaClass("android.provider.Settings$Secure");
         var androidId = secure.CallStatic<string>("getString", contentResolver, "android_id");
+
+        Debug.Log(androidId);
+
         var request = new LoginWithAndroidDeviceIDRequest
         {
             AndroidDeviceId = androidId,
             CreateAccount = true
         };
 
+        var source = new UniTaskCompletionSource<LoginResult>();
+        Action<LoginResult> resultCallback = (_result) => source.TrySetResult(_result);
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
         PlayFabClientAPI.LoginWithAndroidDeviceID(request, resultCallback, errorCallback);
+        return source.Task;
     }
 
-    private void TryLoginDefault(Action<LoginResult> resultCallback, Action<PlayFabError> errorCallback)
+    private UniTask<LoginResult> TryLoginDefaultAsync()
     {
         // WebGL では端末 ID 的なものがなく、スコアランキング程度で Facebook 等連携してもらうのもユーザに手間をかけるので、
         // 簡易な端末 ID もどきとして。
@@ -89,6 +83,10 @@ public class PlayFabLoginManagerSingleton
             CreateAccount = true
         };
 
+        var source = new UniTaskCompletionSource<LoginResult>();
+        Action<LoginResult> resultCallback = (_result) => source.TrySetResult(_result);
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
         PlayFabClientAPI.LoginWithCustomID(request, resultCallback, errorCallback);
+        return source.Task;
     }
 }

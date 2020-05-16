@@ -30,21 +30,22 @@ public class LeaderboardView : MonoBehaviour
         tweetButton.gameObject.SetActive(true);
     }
 
-    private UniTask<List<PlayerLeaderboardEntry>> GetLeaderboardWithRetry()
+    private async UniTask<List<PlayerLeaderboardEntry>> GetLeaderboardWithRetry()
     {
-        var source = new UniTaskCompletionSource<List<PlayerLeaderboardEntry>>();
-        Action<List<PlayerLeaderboardEntry>> onSuccess = (_entries) => source.TrySetResult(_entries);
-
         var statisticName = TitleConstData.LeaderboardStatisticName;
         var maxResultsCount = TitleConstData.LeaderboardEntryCount;
-        PlayFabLeaderboardUtil.GetLeaderboard(statisticName, maxResultsCount, onSuccess, async (_) =>
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(1));
-            var playerLeaderboardEntries = await GetLeaderboardWithRetry();
-            source.TrySetResult(playerLeaderboardEntries);
-        });
 
-        return source.Task;
+        while (true)
+        {
+            try
+            {
+                return await PlayFabLeaderboardUtil.GetLeaderboardAsync(statisticName, maxResultsCount);
+            }
+            catch (Exception)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
     }
 
     private void SetupScrollView(List<PlayerLeaderboardEntry> playerLeaderboardEntries)

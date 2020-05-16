@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using PlayFab;
 using PlayFab.ClientModels;
+using UniRx.Async;
 using UnityEngine;
 
 public class PlayFabLeaderboardUtil
 {
-    public static void UpdatePlayerStatistic(string statisticName, int value, Action onSuccess, Action<string> onFailure)
+    public static UniTask<UpdatePlayerStatisticsResult> UpdatePlayerStatisticAsync(string statisticName, int value)
     {
         var request = new UpdatePlayerStatisticsRequest
         {
@@ -19,33 +20,14 @@ public class PlayFabLeaderboardUtil
             }
         };
 
-        PlayFabClientAPI.UpdatePlayerStatistics(
-            request,
-            _result =>
-            {
-                DebugLogUpdateStatistics(_result);
-                onSuccess?.Invoke();
-            },
-            _error =>
-            {
-                var report = _error.GenerateErrorReport();
-                Debug.LogError(report);
-                onFailure?.Invoke(report);
-            });
+        var source = new UniTaskCompletionSource<UpdatePlayerStatisticsResult>();
+        Action<UpdatePlayerStatisticsResult> resultCallback = (_result) => source.TrySetResult(_result);
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
+        PlayFabClientAPI.UpdatePlayerStatistics(request, resultCallback, errorCallback);
+        return source.Task;
     }
 
-    private static void DebugLogUpdateStatistics(UpdatePlayerStatisticsResult result)
-    {
-        var request = result.Request as UpdatePlayerStatisticsRequest;
-        var stringBuilder = new StringBuilder();
-        foreach (var statistic in request.Statistics)
-        {
-            stringBuilder.AppendFormat("{0}:{1}:{2}", statistic.StatisticName, statistic.Version, statistic.Value);
-        }
-        Debug.Log(stringBuilder);
-    }
-
-    public static void GetLeaderboard(string statisticName, int maxResultsCount, Action<List<PlayerLeaderboardEntry>> onSuccess, Action<string> onFailure)
+    public static UniTask<List<PlayerLeaderboardEntry>> GetLeaderboardAsync(string statisticName, int maxResultsCount)
     {
         var request = new GetLeaderboardRequest
         {
@@ -53,19 +35,15 @@ public class PlayFabLeaderboardUtil
             StatisticName = statisticName,
         };
 
-        PlayFabClientAPI.GetLeaderboard(
-            request,
-            _result =>
-            {
-                DebugLogLeaderboard(_result);
-                onSuccess?.Invoke(_result.Leaderboard);
-            },
-            _error =>
-            {
-                var report = _error.GenerateErrorReport();
-                Debug.LogError(report);
-				onFailure?.Invoke(report);
-            });
+        var source = new UniTaskCompletionSource<List<PlayerLeaderboardEntry>>();
+        Action<GetLeaderboardResult> resultCallback = (_result) =>
+        {
+            DebugLogLeaderboard(_result);
+            source.TrySetResult(_result.Leaderboard);
+        };
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
+        PlayFabClientAPI.GetLeaderboard(request, resultCallback, errorCallback);
+        return source.Task;
     }
 
     private static void DebugLogLeaderboard(GetLeaderboardResult result)
@@ -78,22 +56,17 @@ public class PlayFabLeaderboardUtil
         Debug.Log(stringBuilder);
     }
 
-    public static void UpdateUserTitleDisplayName(string displayName, Action onSuccess, Action<string> onFailure)
+    public static UniTask<UpdateUserTitleDisplayNameResult> UpdateUserTitleDisplayNameAsync(string displayName)
     {
         var request = new UpdateUserTitleDisplayNameRequest
         {
             DisplayName = displayName
         };
-        PlayFabClientAPI.UpdateUserTitleDisplayName(request,
-            _result =>
-            {
-                Debug.Log(_result.DisplayName);
-                onSuccess?.Invoke();
-            },
-            _error => {
-                var report = _error.GenerateErrorReport();
-                Debug.LogError(report);
-                onFailure?.Invoke(report);
-            });
+
+        var source = new UniTaskCompletionSource<UpdateUserTitleDisplayNameResult>();
+        Action<UpdateUserTitleDisplayNameResult> resultCallback = (_result) => source.TrySetResult(_result);
+        Action<PlayFabError> errorCallback = (_error) => source.TrySetException(new Exception(_error.GenerateErrorReport()));
+        PlayFabClientAPI.UpdateUserTitleDisplayName(request, resultCallback, errorCallback);
+        return source.Task;
     }
 }

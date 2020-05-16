@@ -11,38 +11,40 @@ public class InitialScene : MonoBehaviour
         Debug.unityLogger.logEnabled = false;
 #endif
         AudioClipManagerSingleton.Instance.Preload();
-        await LoginWithRetry();
-        await GetTitleConstDataWithRetry();
+        await LoginAsyncWithRetry();
+        await GetTitleConstDataAsyncWithRetry();
         SceneManager.LoadScene("SampleScene");
     }
 
-    private UniTask LoginWithRetry()
+    private async UniTask LoginAsyncWithRetry()
     {
-        var source = new UniTaskCompletionSource();
-        Action onSuccess = () => source.TrySetResult();
-
-        PlayFabLoginManagerSingleton.Instance.TryLogin(onSuccess, async (_) =>
+        while (true)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(1));
-            await LoginWithRetry();
-            source.TrySetResult();
-        });
-
-        return source.Task;
+            try
+            {
+                await PlayFabLoginManagerSingleton.Instance.TryLoginAsync();
+                break;
+            }
+            catch (Exception)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
     }
 
-    private UniTask GetTitleConstDataWithRetry()
+    private async UniTask GetTitleConstDataAsyncWithRetry()
     {
-        var source = new UniTaskCompletionSource();
-        Action onSuccess = () => source.TrySetResult();
-
-        PlayFabTitleConstDataManagerSingleton.Instance.TryGetData(onSuccess, async (_) =>
+        while (true)
         {
-            await UniTask.Delay(TimeSpan.FromSeconds(1));
-            await GetTitleConstDataWithRetry();
-            source.TrySetResult();
-        });
-
-        return source.Task;
+            try
+            {
+                await PlayFabTitleConstDataManagerSingleton.Instance.TryGetDataAsync();
+                break;
+            }
+            catch (Exception)
+            {
+                await UniTask.Delay(TimeSpan.FromSeconds(1));
+            }
+        }
     }
 }
