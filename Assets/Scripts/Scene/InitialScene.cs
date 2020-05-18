@@ -10,7 +10,6 @@ public class InitialScene : MonoBehaviour
 #if !UNITY_EDITOR
         Debug.unityLogger.logEnabled = false;
 #endif
-        AudioClipManagerSingleton.Instance.Preload();
         await LoginAsyncWithRetry();
         await GetTitleConstDataAsyncWithRetry();
         SceneManager.LoadScene("SampleScene");

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using KanKikuchi.AudioManager;
 using UniRx.Async;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class SampleScene : MonoBehaviour
 {
@@ -16,7 +16,6 @@ public class SampleScene : MonoBehaviour
     [SerializeField] private InGameView inGameView;
     [SerializeField] private LeaderboardView leaderboardViewPrefab;
     [SerializeField] private InputManager inputManager;
-    [SerializeField] private AudioSource audioSource;
 
     private int initialHumanCount;
     private List<Human> humans;
@@ -42,8 +41,7 @@ public class SampleScene : MonoBehaviour
         inputManager.Initialize(abductionCircle, null);
         titleView.gameObject.SetActive(true);
         inGameView.gameObject.SetActive(false);
-        audioSource.clip = AudioClipManagerSingleton.Instance.Bgm;
-        audioSource.Play();
+        BGMManager.Instance.Play(BGMPath.UFO);
     }
 
     private void FixedUpdate()
@@ -95,9 +93,9 @@ public class SampleScene : MonoBehaviour
         humans = remainingHumans;
         remainingCount--;
         UpdateHudText();
-        audioSource.PlayOneShot(AudioClipManagerSingleton.Instance.Abduct);
+        SEManager.Instance.Play(SEPath.UKU);
 
-        _ = ChallengeNextOrEndGame();
+        ChallengeNextOrEndGame().Forget();
     }
 
     private async UniTask ChallengeNextOrEndGame()
@@ -123,8 +121,8 @@ public class SampleScene : MonoBehaviour
             inGameView.gameObject.SetActive(false);
             var leaderboardView = Instantiate(leaderboardViewPrefab, hudRoot.transform);
             leaderboardView.InitializeTweetButton(score, screenShotTexture);
-            audioSource.Stop();
-            audioSource.PlayOneShot(AudioClipManagerSingleton.Instance.Result);
+            BGMManager.Instance.Stop();
+            SEManager.Instance.Play(SEPath.SPACESHIP2);
         }
     }
 
